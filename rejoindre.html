@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rejoindre FidOresto</title><link rel="stylesheet" href="style.css">
+<style>
+.hero{text-align:center;padding:28px 16px 8px}
+.hero img{width:220px;max-width:70%}
+.shop{font-size:22px;font-weight:800;margin:10px 0 4px}
+.steps{list-style:none;padding:0;margin:0}
+.step{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin:12px 0}
+.num{flex:none;width:30px;height:30px;border-radius:15px;background:var(--brand);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.step p{margin:2px 0 10px}
+.btn{display:block;text-align:center}
+.btn.green{background:var(--brand)}
+.btn.ghost{background:#fff;color:var(--brand-dark);border:2px solid var(--brand)}
+.note{background:#FAEEDA;border-radius:12px;padding:12px 14px;font-size:14px}
+.hidden{display:none}
+</style></head>
+<body>
+<div class="hero">
+  <img src="logo.png" alt="FidOresto">
+  <div class="shop" id="shop">Bienvenue sur FidOresto</div>
+  <div class="muted" id="sub">La fidélité récompensée dans tes commerces préférés</div>
+</div>
+<main style="padding-top:8px">
+
+  <!-- iPhone -->
+  <div id="ios" class="note hidden">FidOresto est disponible sur Android. La version iPhone arrive bientôt !</div>
+
+  <!-- Phase de test fermé -->
+  <section id="test" class="hidden">
+    <p>FidOresto est en <strong>test</strong> avant son lancement officiel. Rejoins les premiers utilisateurs en 3 étapes (téléphone Android et compte Gmail nécessaires) :</p>
+    <ol class="steps">
+      <li class="step"><span class="num">1</span><div style="flex:1"><p><strong>Rejoins le groupe des testeurs</strong> avec ton compte Gmail, puis reviens sur cette page.</p><a class="btn green" id="groupBtn" href="#">Rejoindre les testeurs</a></div></li>
+      <li class="step"><span class="num">2</span><div style="flex:1"><p><strong>Accepte l'invitation au test</strong> sur la page Google Play qui s'ouvre.</p><a class="btn green" id="optinBtn" href="#">Accepter le test</a></div></li>
+      <li class="step"><span class="num">3</span><div style="flex:1"><p><strong>Installe FidOresto</strong> et crée ton compte client : la carte de fidélité du commerce t'attend.</p><a class="btn" id="installBtn" href="#">Installer FidOresto</a></div></li>
+    </ol>
+    <p class="muted">Garde l'appli installée au moins 14 jours : ça nous aide énormément pour le lancement. Merci !</p>
+    <div id="notReady" class="note hidden">Le test ouvre très bientôt. Repasse d'ici quelques jours !</div>
+  </section>
+
+  <!-- Appli publiée -->
+  <section id="public" class="hidden">
+    <p>Installe FidOresto et crée ton compte : la carte de fidélité du commerce t'attend.</p>
+    <a class="btn" id="publicBtn" href="#">Installer FidOresto</a>
+  </section>
+
+  <div style="margin-top:22px">
+    <a class="btn ghost" id="openBtn" href="#">J'ai déjà l'appli : ouvrir le commerce</a>
+  </div>
+</main>
+<footer style="text-align:center;margin-top:24px"><a href="confidentialite.html">Confidentialité</a> · <a href="index.html">FidOresto</a></footer>
+
+<script>
+// ====== RÉGLAGES (à remplir quand le test fermé est prêt) ======
+var CONFIG = {
+  mode: 'test',            // 'test' pendant le test fermé, 'public' une fois l'appli publiée
+  googleGroupUrl: '',      // lien du groupe Google des testeurs
+  optInUrl: '',            // lien « Rejoindre le test » donné par la Play Console
+  packageName: 'com.fidoresto.app'
+};
+// ===============================================================
+
+(function () {
+  var params = new URLSearchParams(location.search);
+  var code = (params.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+  var name = (params.get('n') || '').slice(0, 60);
+
+  if (name) {
+    document.getElementById('shop').textContent = name;
+    document.getElementById('sub').textContent = 'te fait découvrir FidOresto : cumule des points et gagne des récompenses !';
+    document.title = name + ' – FidOresto';
+  }
+
+  var referrer = code ? '&referrer=' + encodeURIComponent('fido_code=' + code) : '';
+  var playUrl = 'https://play.google.com/store/apps/details?id=' + CONFIG.packageName + referrer;
+  // Ouvre l'appli si elle est installée, sinon le Play Store (avec le code du commerce).
+  var intentUrl = 'intent://rejoindre/' + code + '#Intent;scheme=fidoresto;package=' + CONFIG.packageName +
+    ';S.browser_fallback_url=' + encodeURIComponent(playUrl) + ';end';
+
+  var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  var isAndroid = /Android/i.test(navigator.userAgent);
+  if (isIOS) document.getElementById('ios').classList.remove('hidden');
+
+  if (CONFIG.mode === 'public') {
+    document.getElementById('public').classList.remove('hidden');
+    document.getElementById('publicBtn').href = isAndroid ? intentUrl : playUrl;
+  } else {
+    document.getElementById('test').classList.remove('hidden');
+    document.getElementById('installBtn').href = playUrl;
+    if (CONFIG.googleGroupUrl && CONFIG.optInUrl) {
+      document.getElementById('groupBtn').href = CONFIG.googleGroupUrl;
+      document.getElementById('optinBtn').href = CONFIG.optInUrl;
+    } else {
+      document.getElementById('notReady').classList.remove('hidden');
+      ['groupBtn', 'optinBtn'].forEach(function (id) {
+        var b = document.getElementById(id); b.style.opacity = .45; b.removeAttribute('href');
+      });
+    }
+  }
+
+  var openBtn = document.getElementById('openBtn');
+  if (code && isAndroid) openBtn.href = intentUrl;
+  else if (code) openBtn.href = 'fidoresto://rejoindre/' + code;
+  else openBtn.style.display = 'none';
+})();
+</script>
+</body></html>
