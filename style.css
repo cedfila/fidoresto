@@ -14,3 +14,8 @@ th,td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var
 th{color:var(--muted);font-weight:600}
 a{color:var(--brand-dark)}
 footer{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:13px}
+/* Sélecteur de langue FR | EN (en haut à droite, visible aussi sur téléphone) */
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.langsw{display:inline-flex;border:1.5px solid rgba(255,255,255,.7);border-radius:99px;overflow:hidden;flex-shrink:0}
+.langsw a{color:#fff;font-size:14px;font-weight:700;padding:6px 12px;text-decoration:none;line-height:1}
+.langsw a[aria-current]{background:#fff;color:var(--brand-dark)}
